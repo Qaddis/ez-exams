@@ -1,0 +1,23 @@
+/* -- ПPreparing for styling -- */
+
+/* Reset default styles */
+@import url("./reset.css");
+
+/* Fonts */
+
+/* Variables */
+@import url("./variables.css");
+
+/* -- Styling -- */
+html {
+	font-size: 16px;
+}
+
+body {
+	font-family: var(--noto-font);
+	background-color: var(--light-color);
+	color: var(--primary-dark-color);
+}
+
+main {
+}

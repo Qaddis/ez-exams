@@ -1,0 +1,9 @@
+:root {
+	--light-color: #eaebed;
+	--primary-dark-color: #333436;
+	--secondary-dark-color: #414245;
+	--accent-color: #38508f;
+
+	--noto-font: "Noto Sans", sans-serif;
+	--comic-font: "Comic Relief", system-ui;
+}
