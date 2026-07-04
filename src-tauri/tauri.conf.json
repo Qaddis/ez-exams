@@ -12,9 +12,11 @@
 	"app": {
 		"windows": [
 			{
-				"title": "ez-exams",
-				"width": 800,
-				"height": 600
+				"title": "EzExams | By Qaddis",
+				"width": 1200,
+				"height": 720,
+				"minWidth": 920,
+				"minHeight": 600
 			}
 		],
 		"security": {
