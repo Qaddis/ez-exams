@@ -1,14 +1,15 @@
-/* -- ПPreparing for styling -- */
+/* -- Подготовка к стилизации -- */
 
-/* Reset default styles */
+/* Сброс стандартных стилей */
 @import url("./reset.css");
 
-/* Fonts */
+/* Шрифты */
+@import url("./fonts.css");
 
-/* Variables */
+/* Переменные */
 @import url("./variables.css");
 
-/* -- Styling -- */
+/* -- Стилизация -- */
 html {
 	font-size: 16px;
 }
