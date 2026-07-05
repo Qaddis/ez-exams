@@ -17,7 +17,7 @@ html {
 body {
 	font-family: var(--noto-font);
 	background-color: var(--light-color);
-	color: var(--primary-dark-color);
+	color: var(--primary-color);
 }
 
 main {
