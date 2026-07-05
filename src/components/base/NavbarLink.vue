@@ -6,7 +6,7 @@ interface IProps {
 	iconId: string
 }
 
-const props = defineProps<IProps>()
+defineProps<IProps>()
 
 const route = useRoute()
 </script>
