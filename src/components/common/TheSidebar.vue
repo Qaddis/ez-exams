@@ -18,7 +18,7 @@ const changeSidebarState = () => {
 	<motion.aside
 		class="sidebar"
 		:animate="isOpen ? 'open' : 'close'"
-		:variants="{ open: { width: '22.5vw' }, close: { width: 76 } }"
+		:variants="{ open: { width: 270 }, close: { width: 76 } }"
 	>
 		<motion.h1
 			:variants="{ open: { gap: '0 5px' }, close: { gap: '0 0' } }"
@@ -89,7 +89,6 @@ const changeSidebarState = () => {
 
 <style scoped>
 .sidebar {
-	width: 22.5vw;
 	border: 3px solid var(--secondary-color);
 	border-radius: 10px;
 	padding: 7.5px;

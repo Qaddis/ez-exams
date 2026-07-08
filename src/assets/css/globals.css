@@ -18,7 +18,19 @@ body {
 	font-family: var(--noto-font);
 	background-color: var(--light-color);
 	color: var(--primary-color);
+
+	overflow: hidden;
 }
 
-main {
+::-webkit-scrollbar {
+	width: 5px;
+}
+
+::-webkit-scrollbar-track {
+	background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: var(--secondary-color);
+	border-radius: 5px;
 }
