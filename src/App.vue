@@ -14,4 +14,17 @@ import AppSidebar from "@/components/common/TheSidebar.vue"
 	</div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.wrapper {
+	width: 100vw;
+	height: 100vh;
+	padding: 15px;
+
+	display: flex;
+	gap: 25px;
+}
+
+.main {
+	flex-grow: 1;
+}
+</style>

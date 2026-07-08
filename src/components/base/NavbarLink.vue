@@ -1,25 +1,57 @@
 <script setup lang="ts">
+import { computed, useSlots } from "vue"
 import { RouterLink, useRoute } from "vue-router"
+
+import { motion } from "motion-v"
 
 interface IProps {
 	to: string
 	iconId: string
+	isOpen: boolean
 }
 
-defineProps<IProps>()
+const props = defineProps<IProps>()
 
 const route = useRoute()
+
+const slots = useSlots()
+
+const slotText = computed<string | undefined>(() => {
+	const defaultSlot = slots.default?.()
+
+	if (
+		defaultSlot &&
+		defaultSlot[0] &&
+		typeof defaultSlot[0].children === "string"
+	)
+		return defaultSlot[0].children
+
+	return undefined
+})
 </script>
 
 <template>
-	<router-link :to="to" class="link" :class="{ active: route.path === to }">
+	<router-link
+		:to="to"
+		class="link"
+		:class="{ active: route.path === to }"
+		:title="slotText"
+	>
 		<svg class="icon">
 			<use :href="`/icons.svg#${iconId}`"></use>
 		</svg>
 
-		<p class="text">
-			<slot />
-		</p>
+		<motion.div
+			class="text-wrapper"
+			:animate="{
+				gridTemplateColumns: isOpen ? '1fr' : '0fr',
+				marginLeft: isOpen ? 5 : 0
+			}"
+		>
+			<p class="text">
+				<slot />
+			</p>
+		</motion.div>
 	</router-link>
 </template>
 
@@ -28,7 +60,6 @@ const route = useRoute()
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 0 5px;
 
 	width: 100%;
 	height: min-content;
@@ -89,11 +120,17 @@ const route = useRoute()
 .text {
 	font-size: 1.15rem;
 	font-weight: 600;
+	min-width: 0;
 }
 
 .icon {
 	width: 1.35rem;
 	height: 1.35rem;
 	fill: var(--primary-color);
+}
+
+.text-wrapper {
+	display: grid;
+	overflow: hidden;
 }
 </style>
