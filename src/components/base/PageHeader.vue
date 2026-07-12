@@ -10,7 +10,6 @@
 	background-color: var(--light-color);
 	border-bottom: 2px solid var(--secondary-color);
 	padding-bottom: 5px;
-	margin-bottom: 15px;
 
 	font-size: 1.8rem;
 	font-family: var(--comic-font);
