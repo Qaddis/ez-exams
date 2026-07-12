@@ -7,6 +7,11 @@ import { NavigationEnum } from "@/constants/navigation.constants"
 
 import NavbarLink from "../base/NavbarLink.vue"
 
+import BackIcon from "@/assets/icons/back.svg"
+import FolderIcon from "@/assets/icons/folder.svg"
+import HomeIcon from "@/assets/icons/home.svg"
+import SettingsIcon from "@/assets/icons/settings.svg"
+
 const isOpen = ref<boolean>(true)
 
 const changeSidebarState = () => {
@@ -38,23 +43,19 @@ const changeSidebarState = () => {
 		</motion.h1>
 
 		<nav class="navigation">
-			<navbar-link
-				:to="NavigationEnum.HOME"
-				icon-id="home-icon"
-				:is-open="isOpen"
-			>
+			<navbar-link :to="NavigationEnum.HOME" :icon="HomeIcon" :is-open="isOpen">
 				Главная
 			</navbar-link>
 			<navbar-link
 				:to="NavigationEnum.GROUPS.ALL"
-				icon-id="folder-icon"
+				:icon="FolderIcon"
 				:is-open="isOpen"
 			>
 				Папки
 			</navbar-link>
 			<navbar-link
 				:to="NavigationEnum.SETTINGS"
-				icon-id="settings-icon"
+				:icon="SettingsIcon"
 				:is-open="isOpen"
 			>
 				Настройки
@@ -66,13 +67,13 @@ const changeSidebarState = () => {
 			class="sidebar-btn"
 			:title="isOpen ? 'Свернуть боковую панель' : 'Раскрыть боковую панель'"
 		>
-			<motion.svg
-				class="sidebar-btn__icon"
+			<motion.div
+				class="sidebar-btn__icon-wrapper"
 				:variants="{ open: { rotateZ: 0 }, close: { rotateZ: 180 } }"
 				:transition="{ rotateZ: { bounce: 0 } }"
 			>
-				<use :href="'/icons.svg#back-icon'"></use>
-			</motion.svg>
+				<back-icon class="sidebar-btn__icon" />
+			</motion.div>
 
 			<motion.div
 				class="text-wrapper"
@@ -177,10 +178,16 @@ const changeSidebarState = () => {
 .sidebar-btn__icon {
 	width: 1.35rem;
 	height: 1.35rem;
+
 	fill: var(--primary-color);
 	outline: none !important;
 
 	transition: fill 0.15s;
+}
+
+.sidebar-btn__icon-wrapper {
+	width: 1.35rem;
+	height: 1.35rem;
 }
 
 .sidebar-btn__text {

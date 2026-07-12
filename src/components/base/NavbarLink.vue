@@ -6,7 +6,7 @@ import { motion } from "motion-v"
 
 interface IProps {
 	to: string
-	iconId: string
+	icon: string
 	isOpen: boolean
 }
 
@@ -37,9 +37,7 @@ const slotText = computed<string | undefined>(() => {
 		:class="{ active: route.path === to }"
 		:title="slotText"
 	>
-		<svg class="icon">
-			<use :href="`/icons.svg#${iconId}`"></use>
-		</svg>
+		<component :is="icon" class="icon" />
 
 		<motion.div
 			class="text-wrapper"

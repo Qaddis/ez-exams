@@ -1,12 +1,15 @@
-import vue from "@vitejs/plugin-vue"
-import path from "path"
 import { defineConfig } from "vite"
+
+import path from "path"
+
+import vue from "@vitejs/plugin-vue"
+import svgLoader from "vite-svg-loader"
 
 const host = process.env.TAURI_DEV_HOST
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
-	plugins: [vue()],
+	plugins: [vue(), svgLoader()],
 	clearScreen: false,
 	server: {
 		port: 1420,
