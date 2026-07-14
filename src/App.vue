@@ -2,6 +2,7 @@
 import { RouterView } from "vue-router"
 
 import AppSidebar from "@/components/common/TheSidebar.vue"
+import ModalsLayout from "./components/common/ModalsLayout.vue"
 </script>
 
 <template>
@@ -12,6 +13,8 @@ import AppSidebar from "@/components/common/TheSidebar.vue"
 			<router-view />
 		</main>
 	</div>
+
+	<modals-layout />
 </template>
 
 <style scoped>
