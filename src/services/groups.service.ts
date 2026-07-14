@@ -12,7 +12,7 @@ import { safeParse } from "valibot"
 
 import { FunctionalFilesEnum } from "@/constants/files.constants"
 import { GroupSettingsSchema } from "@/schemas/groups.schemas"
-import type { GroupRawType } from "@/types/groups.types"
+import type { GroupDataType, GroupRawType } from "@/types/groups.types"
 
 interface IGetGroupsDir {
 	groupsDir: string
@@ -83,7 +83,7 @@ class GroupService {
 	 * Создаёт новую группу
 	 * @param groupParams - объект, содержащий название и цвет группы
 	 */
-	async createGroup({ title, color }: Omit<GroupRawType, "id">): Promise<void> {
+	async createGroup({ title, color }: GroupDataType): Promise<void> {
 		const { groupsDir } = await this.getGroupsDir()
 		const groups = await this.getAllGroups()
 

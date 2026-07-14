@@ -4,7 +4,7 @@ import { defineStore } from "pinia"
 
 import appSettingsService from "@/services/appSettings.service"
 import groupsService from "@/services/groups.service"
-import type { GroupRawType, IGroup } from "@/types/groups.types"
+import type { GroupDataType, GroupRawType, IGroup } from "@/types/groups.types"
 
 export const useGroupsStore = defineStore("groups-store", () => {
 	const rawGroups = ref<GroupRawType[]>([])
@@ -54,7 +54,7 @@ export const useGroupsStore = defineStore("groups-store", () => {
 	 * Создаёт новую группу и обновляет список групп в groups store
 	 * @param newGroup параметры новой группы
 	 */
-	async function createGroup(newGroup: Omit<GroupRawType, "id">) {
+	async function createGroup(newGroup: GroupDataType) {
 		try {
 			await groupsService.createGroup(newGroup)
 
