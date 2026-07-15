@@ -17,7 +17,7 @@ const modalsStore = useModalsStore()
 <template>
 	<animate-presence>
 		<motion.div
-			v-if="modalsStore.modal === modalName"
+			v-if="modalsStore.modal?.name === modalName"
 			@click="closeFunc"
 			class="overlay"
 			:initial="{ opacity: 0 }"
