@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue"
 
-import { flatten, safeParse } from "valibot"
-
 import { groupColors } from "@/constants/groups.constants"
 import { GroupFormSchema } from "@/schemas/groups.schemas"
 import { useGroupsStore } from "@/stores/groups.store"
 import { useModalsStore } from "@/stores/modals.store"
 import type { GroupDataType } from "@/types/groups.types"
+import validateForm from "@/utils/validateForm"
 
 import ModalOverlay from "@/components/base/ModalOverlay.vue"
 import AppButton from "@/components/base/ui/AppButton.vue"
@@ -29,15 +28,8 @@ const formErrors = ref<Record<"title" | "color", string | undefined>>({
 const formSubmit = async (): Promise<void> => {
 	formErrors.value = { color: undefined, title: undefined }
 
-	const result = safeParse(GroupFormSchema, formData)
-
-	if (!result.success) {
-		const issues = flatten(result.issues)
-
-		if (issues.nested)
-			for (const [key, value] of Object.entries(issues.nested))
-				if (value) formErrors.value[key as "title" | "color"] = value[0]
-	} else {
+	const isValid = validateForm(GroupFormSchema, formData, formErrors)
+	if (isValid) {
 		await createGroup(formData)
 
 		close()
