@@ -44,6 +44,7 @@ const onInput = (evt: Event): void => {
 			:name
 			:placeholder
 			:type
+			autocomplete="off"
 		/>
 
 		<span v-if="errorMsg" class="error-message">{{ errorMsg }}</span>
