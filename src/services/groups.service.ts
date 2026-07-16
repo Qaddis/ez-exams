@@ -13,6 +13,7 @@ import { safeParse } from "valibot"
 import { FunctionalFilesEnum } from "@/constants/files.constants"
 import { GroupSettingsSchema } from "@/schemas/groups.schemas"
 import type { GroupDataType, GroupRawType } from "@/types/groups.types"
+import { ServiceError } from "@/utils/serviceError"
 
 interface IGetGroupsDir {
 	groupsDir: string
@@ -117,10 +118,56 @@ class GroupService {
 	async removeGroup(id: GroupRawType["id"]): Promise<void> {
 		const { groupsDir, isCreated } = await this.getGroupsDir()
 
-		if (isCreated) return
+		if (isCreated)
+			throw new ServiceError(
+				"groups-remove:non-exists",
+				"Группа с указанным ID не существует"
+			)
 
 		const groupDir = await join(groupsDir, id)
 		if (await exists(groupsDir)) await remove(groupDir, { recursive: true })
+	}
+
+	/**
+	 * Изменяет параметры группы по ID
+	 * @param id ID группы
+	 * @param newParams новые параметры группы
+	 */
+	async editGroup(
+		id: GroupRawType["id"],
+		{ title, color }: GroupDataType
+	): Promise<void> {
+		const { groupsDir, isCreated } = await this.getGroupsDir()
+
+		if (isCreated)
+			throw new ServiceError(
+				"groups-edit:non-exists",
+				"Группа с указанным ID не существует"
+			)
+
+		const groupDirSettFile = await join(
+			groupsDir,
+			id,
+			FunctionalFilesEnum.GROUP_SETTINGS_FILE
+		)
+		if (!(await exists(groupDirSettFile)))
+			throw new ServiceError(
+				"groups-edit:non-exists",
+				"Группа с указанным ID не существует"
+			)
+
+		const oldSettings = JSON.parse(await readTextFile(groupDirSettFile))
+
+		if (!safeParse(GroupSettingsSchema, oldSettings).success)
+			throw new ServiceError(
+				"groups-edit:non-valid",
+				"Файл настроек группы не валиден"
+			)
+
+		await writeTextFile(
+			groupDirSettFile,
+			JSON.stringify({ id: oldSettings.id, title, color }, null, 2)
+		)
 	}
 }
 

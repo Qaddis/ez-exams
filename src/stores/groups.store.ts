@@ -100,12 +100,24 @@ export const useGroupsStore = defineStore("groups-store", () => {
 		}
 	}
 
+	async function editGroup(id: GroupRawType["id"], newParams: GroupDataType) {
+		try {
+			await groupsService.editGroup(id, newParams)
+
+			const groupIdx = rawGroups.value.findIndex(g => g.id === id)!
+			rawGroups.value[groupIdx] = { id, ...newParams }
+		} catch (error) {
+			console.error("Ошибка при изменении параметров группы:", error)
+		}
+	}
+
 	return {
 		groups,
 		isLoading,
 		loadGroups,
 		createGroup,
 		removeGroup,
-		togglePinGroup
+		togglePinGroup,
+		editGroup
 	}
 })
