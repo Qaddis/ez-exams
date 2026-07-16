@@ -77,6 +77,6 @@ const onInput = (evt: Event): void => {
 
 .error-message {
 	margin-top: 5px;
-	color: salmon;
+	color: var(--danger-color);
 }
 </style>

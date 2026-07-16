@@ -89,7 +89,9 @@ const close = () => {
 						</option>
 					</select>
 
-					<span class="select-error"></span>
+					<span v-if="formErrors.color" class="select-error">
+						{{ formErrors.color }}
+					</span>
 				</div>
 
 				<div class="buttons">
@@ -161,6 +163,11 @@ const close = () => {
 
 .select-inp:focus {
 	outline: none;
+}
+
+.select-error {
+	color: var(--danger-color);
+	margin-top: 5px;
 }
 
 .buttons {
