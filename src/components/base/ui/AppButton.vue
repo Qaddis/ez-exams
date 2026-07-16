@@ -3,22 +3,31 @@ import type { ButtonHTMLAttributes } from "vue"
 
 interface IProps extends /* @vue-ignore */ ButtonHTMLAttributes {
 	variant?: "default" | "outlined"
+	danger?: boolean
 }
 
 withDefaults(defineProps<IProps>(), {
-	variant: "default"
+	variant: "default",
+	danger: false
 })
 </script>
 
 <template>
-	<button class="button" :class="[variant]">
+	<button class="button" :class="[variant, { danger: danger }]">
 		<slot />
 	</button>
 </template>
 
 <style scoped>
 .button {
-	border: 1px solid var(--primary-color);
+	--btn-bg: var(--primary-color);
+	--btn-border: var(--primary-color);
+	--btn-text: var(--light-color);
+
+	background: var(--btn-bg);
+	color: var(--btn-text);
+
+	border: 1px solid var(--btn-border);
 	border-radius: 5px;
 	width: 100%;
 	padding: 3.5px 12px;
@@ -34,7 +43,7 @@ withDefaults(defineProps<IProps>(), {
 }
 
 .button:active {
-	opacity: 0.85;
+	opacity: 0.8 !important;
 	translate: 0 2px;
 }
 
@@ -43,18 +52,27 @@ withDefaults(defineProps<IProps>(), {
 	outline-offset: 2px;
 }
 
-.default {
-	background: var(--primary-color);
-	color: var(--light-color);
+.default:hover {
+	--btn-bg: var(--accent-color);
+	--btn-border: var(--accent-color);
 }
 
-.default:hover {
-	background-color: var(--accent-color);
-	border-color: var(--accent-color);
+.outlined {
+	background-color: transparent;
+	color: var(--btn-bg);
 }
 
 .outlined:hover {
-	background-color: var(--primary-color);
-	color: var(--light-color);
+	background-color: var(--btn-bg);
+	color: var(--btn-text);
+}
+
+.button.danger {
+	--btn-bg: var(--danger-color);
+	--btn-border: var(--danger-color);
+}
+
+.default.danger:hover {
+	opacity: 0.9;
 }
 </style>
