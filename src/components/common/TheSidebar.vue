@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 
-import { motion } from "motion-v"
+import { AnimatePresence, motion } from "motion-v"
 
 import { NavigationEnum } from "@/constants/navigation.constants"
 import { useGroupsStore } from "@/stores/groups.store.ts"
@@ -49,15 +49,24 @@ const pinnedGroups = computed(() => groupsStore.groups.filter(g => g.isPinned))
 		</motion.h1>
 
 		<div class="center-block">
-			<ul v-if="pinnedGroups.length > 0" class="pinned-groups">
-				<sidebar-group-card
-					v-for="group in pinnedGroups"
-					:data="group"
-					:is-open="isOpen"
-				/>
-			</ul>
+			<motion.ul
+				class="pinned-groups"
+				:animate="{
+					marginBottom: pinnedGroups.length > 0 ? 25 : 0,
+					transition: { delay: pinnedGroups.length > 0 ? 0 : 0.2 }
+				}"
+			>
+				<animate-presence>
+					<sidebar-group-card
+						v-for="group in pinnedGroups"
+						:data="group"
+						:is-open="isOpen"
+						:key="`sidebar-bm-group-${group.id}`"
+					/>
+				</animate-presence>
+			</motion.ul>
 
-			<nav class="navigation">
+			<motion.nav class="navigation" layout>
 				<navbar-link
 					:to="NavigationEnum.HOME"
 					:icon="HomeIcon"
@@ -79,7 +88,7 @@ const pinnedGroups = computed(() => groupsStore.groups.filter(g => g.isPinned))
 				>
 					Настройки
 				</navbar-link>
-			</nav>
+			</motion.nav>
 		</div>
 
 		<button
@@ -150,8 +159,6 @@ const pinnedGroups = computed(() => groupsStore.groups.filter(g => g.isPinned))
 .pinned-groups {
 	display: flex;
 	flex-direction: column;
-	gap: 5px 0;
-	margin-bottom: 25px;
 }
 
 .navigation {

@@ -25,46 +25,79 @@ const unpinGroup = (): void => {
 
 <template>
 	<motion.li
-		class="card"
-		:style="{ borderColor: data.color, backgroundColor: data.color + '45' }"
-		:variants="{
-			open: { justifyContent: 'space-between' },
-			close: { justifyContent: 'center' }
+		class="card-layout-wrapper"
+		layout
+		:initial="{ height: 0, marginBottom: 0 }"
+		:animate="{
+			height: 'auto',
+			marginBottom: 5,
+			transition: { delay: 0 }
+		}"
+		:exit="{
+			height: 0,
+			marginBottom: 0,
+			transition: { delay: 0.2 }
 		}"
 	>
-		<router-link
-			class="link"
-			:to="NavigationEnum.GROUPS.CURRENT + data.id"
-			:title="isOpen ? '' : data.title"
-		/>
-
-		<motion.div
-			class="heading-wrapper"
-			:variants="{
-				open: { width: '100%', marginRight: 15, opacity: 1 },
-				close: { width: 0, marginRight: 0, opacity: 0 }
+		<motion.article
+			class="card"
+			:style="{
+				borderColor: data.color,
+				backgroundColor: data.color + '45',
+				justifyContent: isOpen ? 'space-between' : 'center'
 			}"
-			:animate="isOpen ? 'open' : 'close'"
+			:initial="{ translateX: 270, opacity: 0 }"
+			:animate="{
+				translateX: 0,
+				opacity: 1,
+				transition: { delay: 0.2, translateX: { bounce: 0, ease: 'easeInOut' } }
+			}"
+			:exit="{
+				translateX: -270,
+				opacity: 0,
+				transition: { delay: 0, translateX: { bounce: 0, ease: 'easeInOut' } }
+			}"
 		>
-			<h3 class="heading" :style="{ color: data.color }">
-				{{ data.title }}
-			</h3>
-		</motion.div>
+			<router-link
+				class="link"
+				:to="NavigationEnum.GROUPS.CURRENT + data.id"
+				:title="isOpen ? '' : data.title"
+			/>
 
-		<div class="btn-wrapper">
-			<button
-				@click="unpinGroup"
-				class="pin-btn"
-				title="Открепить"
-				:style="{ zIndex: isOpen ? 2 : -1 }"
+			<motion.div
+				class="heading-wrapper"
+				:variants="{
+					open: { width: '100%', marginRight: 15, opacity: 1 },
+					close: { width: 0, marginRight: 0, opacity: 0 }
+				}"
+				:animate="isOpen ? 'open' : 'close'"
 			>
-				<bookmark-icon class="pin-btn__icon" :style="{ fill: data.color }" />
-			</button>
-		</div>
+				<h3 class="heading" :style="{ color: data.color }">
+					{{ data.title }}
+				</h3>
+			</motion.div>
+
+			<div class="btn-wrapper">
+				<button
+					@click="unpinGroup"
+					class="pin-btn"
+					title="Открепить"
+					:style="{ zIndex: isOpen ? 2 : -1 }"
+				>
+					<bookmark-icon class="pin-btn__icon" :style="{ fill: data.color }" />
+				</button>
+			</div>
+		</motion.article>
 	</motion.li>
 </template>
 
 <style scoped>
+.card-layout-wrapper {
+	width: 100%;
+	overflow: visible;
+	display: flex;
+}
+
 .card {
 	width: 100%;
 	height: 50px;
