@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router"
 
+import { motion } from "motion-v"
+
 import { NavigationEnum } from "@/constants/navigation.constants"
 import { useGroupsStore } from "@/stores/groups.store"
 import { useModalsStore } from "@/stores/modals.store"
@@ -25,9 +27,24 @@ const openGroupSettings = (): void => {
 </script>
 
 <template>
-	<article
+	<motion.li
 		class="card"
 		:style="{ borderColor: data.color, backgroundColor: data.color + '45' }"
+		layout
+		:initial="{ y: 15, opacity: 0 }"
+		:animate="{
+			y: 0,
+			opacity: 1,
+			transition: { delay: 0.2, duration: 0.2 }
+		}"
+		:exit="{
+			y: -15,
+			opacity: 0,
+			transition: { duration: 0.2 }
+		}"
+		:transition="{
+			layout: { type: 'tween', ease: 'easeOut', duration: 0.32 }
+		}"
 	>
 		<router-link class="link" :to="NavigationEnum.GROUPS.CURRENT + data.id" />
 
@@ -59,7 +76,7 @@ const openGroupSettings = (): void => {
 				<settings-icon :style="{ fill: data.color }" />
 			</button>
 		</div>
-	</article>
+	</motion.li>
 </template>
 
 <style scoped>

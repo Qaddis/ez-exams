@@ -7,6 +7,7 @@ import { useModalsStore } from "@/stores/modals.store"
 import PageHeader from "@/components/base/PageHeader.vue"
 import Spinner from "@/components/base/Spinner.vue"
 import GroupCard from "@/components/widgets/GroupCard.vue"
+import { AnimatePresence } from "motion-v"
 
 const groupsStore = useGroupsStore()
 const { openModal } = useModalsStore()
@@ -26,11 +27,13 @@ onMounted(async () => {
 				v-if="groupsStore.groups.filter(g => g.isPinned).length > 0"
 				class="groups"
 			>
-				<group-card
-					v-for="group in groupsStore.groups.filter(g => g.isPinned)"
-					:key="`pinned-${group.id}`"
-					:data="group"
-				/>
+				<animate-presence mode="popLayout">
+					<group-card
+						v-for="group in groupsStore.groups.filter(g => g.isPinned)"
+						:key="`pinned-${group.id}`"
+						:data="group"
+					/>
+				</animate-presence>
 			</ul>
 			<p v-else class="no-groups">
 				<span>Нет закреплённых папок</span>
@@ -49,11 +52,13 @@ onMounted(async () => {
 			</div>
 
 			<ul v-if="groupsStore.groups.length > 0" class="groups">
-				<group-card
-					v-for="group in groupsStore.groups"
-					:key="group.id"
-					:data="group"
-				/>
+				<animate-presence mode="popLayout">
+					<group-card
+						v-for="group in groupsStore.groups"
+						:key="group.id"
+						:data="group"
+					/>
+				</animate-presence>
 			</ul>
 			<p v-else class="no-groups">
 				<span>Здесь будут ваши папки</span>
