@@ -6,7 +6,7 @@ import { motion } from "motion-v"
 import { NavigationEnum } from "@/constants/navigation.constants"
 import { useGroupsStore } from "@/stores/groups.store.ts"
 
-import NavbarLink from "../base/NavbarLink.vue"
+import NavbarLink from "../widgets/NavbarLink.vue"
 import SidebarGroupCard from "../widgets/SidebarGroupCard.vue"
 
 import BackIcon from "@/assets/icons/back.svg"
