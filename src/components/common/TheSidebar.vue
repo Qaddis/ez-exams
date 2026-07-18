@@ -1,22 +1,28 @@
 <script setup lang="ts">
-import { ref } from "vue"
+import { computed, ref } from "vue"
 
 import { motion } from "motion-v"
 
 import { NavigationEnum } from "@/constants/navigation.constants"
+import { useGroupsStore } from "@/stores/groups.store.ts"
 
 import NavbarLink from "../base/NavbarLink.vue"
+import SidebarGroupCard from "../widgets/SidebarGroupCard.vue"
 
 import BackIcon from "@/assets/icons/back.svg"
 import FolderIcon from "@/assets/icons/folder.svg"
 import HomeIcon from "@/assets/icons/home.svg"
 import SettingsIcon from "@/assets/icons/settings.svg"
 
+const groupsStore = useGroupsStore()
+
 const isOpen = ref<boolean>(true)
 
 const changeSidebarState = () => {
 	isOpen.value = !isOpen.value
 }
+
+const pinnedGroups = computed(() => groupsStore.groups.filter(g => g.isPinned))
 </script>
 
 <template>
@@ -42,25 +48,39 @@ const changeSidebarState = () => {
 			</motion.div>
 		</motion.h1>
 
-		<nav class="navigation">
-			<navbar-link :to="NavigationEnum.HOME" :icon="HomeIcon" :is-open="isOpen">
-				Главная
-			</navbar-link>
-			<navbar-link
-				:to="NavigationEnum.GROUPS.ALL"
-				:icon="FolderIcon"
-				:is-open="isOpen"
-			>
-				Папки
-			</navbar-link>
-			<navbar-link
-				:to="NavigationEnum.SETTINGS"
-				:icon="SettingsIcon"
-				:is-open="isOpen"
-			>
-				Настройки
-			</navbar-link>
-		</nav>
+		<div class="center-block">
+			<ul v-if="pinnedGroups.length > 0" class="pinned-groups">
+				<sidebar-group-card
+					v-for="group in pinnedGroups"
+					:data="group"
+					:is-open="isOpen"
+				/>
+			</ul>
+
+			<nav class="navigation">
+				<navbar-link
+					:to="NavigationEnum.HOME"
+					:icon="HomeIcon"
+					:is-open="isOpen"
+				>
+					Главная
+				</navbar-link>
+				<navbar-link
+					:to="NavigationEnum.GROUPS.ALL"
+					:icon="FolderIcon"
+					:is-open="isOpen"
+				>
+					Папки
+				</navbar-link>
+				<navbar-link
+					:to="NavigationEnum.SETTINGS"
+					:icon="SettingsIcon"
+					:is-open="isOpen"
+				>
+					Настройки
+				</navbar-link>
+			</nav>
+		</div>
 
 		<button
 			@click="changeSidebarState"
@@ -125,6 +145,13 @@ const changeSidebarState = () => {
 
 .logo__text span {
 	color: var(--accent-color);
+}
+
+.pinned-groups {
+	display: flex;
+	flex-direction: column;
+	gap: 5px 0;
+	margin-bottom: 25px;
 }
 
 .navigation {
