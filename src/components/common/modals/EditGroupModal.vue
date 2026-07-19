@@ -5,7 +5,7 @@ import { groupColors } from "@/constants/groups.constants"
 import { GroupFormSchema } from "@/schemas/groups.schemas"
 import { useGroupsStore } from "@/stores/groups.store"
 import { useModalsStore } from "@/stores/modals.store"
-import type { GroupDataType } from "@/types/groups.types"
+import type { GroupFormDataType } from "@/types/groups.types"
 import validateForm from "@/utils/validateForm"
 
 import ModalOverlay from "@/components/base/ModalOverlay.vue"
@@ -18,7 +18,7 @@ const groupsStore = useGroupsStore()
 const groupId = ref<string>("")
 const showRemoveSect = ref<boolean>(false)
 
-const formData = reactive<GroupDataType>({
+const formData = reactive<GroupFormDataType>({
 	title: "",
 	color: groupColors[0].value
 })

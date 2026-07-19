@@ -12,7 +12,7 @@ import { safeParse } from "valibot"
 
 import { FunctionalFilesEnum } from "@/constants/files.constants"
 import { GroupSettingsSchema } from "@/schemas/groups.schemas"
-import type { GroupDataType, GroupRawType } from "@/types/groups.types"
+import type { GroupFormDataType, GroupRawType } from "@/types/groups.types"
 import { ServiceError } from "@/utils/serviceError"
 
 interface IGetGroupsDir {
@@ -70,12 +70,19 @@ class GroupService {
 			)
 			if (!(await exists(groupSettFile))) continue
 
-			const groupSettings = JSON.parse(await readTextFile(groupSettFile))
+			const rawData = JSON.parse(await readTextFile(groupSettFile))
+			const groupSettings: GroupRawType = {
+				...rawData,
+				createdAt: new Date(rawData.createdAt),
+				updatedAt: new Date(rawData.updatedAt)
+			}
 
 			if (!safeParse(GroupSettingsSchema, groupSettings).success) continue
 
 			groupsData.push(groupSettings)
 		}
+
+		groupsData.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
 
 		return groupsData
 	}
@@ -84,7 +91,7 @@ class GroupService {
 	 * Создаёт новую группу
 	 * @param groupParams - объект, содержащий название и цвет группы
 	 */
-	async createGroup({ title, color }: GroupDataType): Promise<void> {
+	async createGroup({ title, color }: GroupFormDataType): Promise<void> {
 		const { groupsDir } = await this.getGroupsDir()
 		const groups = await this.getAllGroups()
 
@@ -107,7 +114,11 @@ class GroupService {
 
 		await writeTextFile(
 			groupSettFile,
-			JSON.stringify({ id, title, color }, null, 2)
+			JSON.stringify(
+				{ id, title, color, createdAt: new Date(), updatedAt: new Date() },
+				null,
+				2
+			)
 		)
 	}
 
@@ -135,7 +146,7 @@ class GroupService {
 	 */
 	async editGroup(
 		id: GroupRawType["id"],
-		{ title, color }: GroupDataType
+		{ title, color, createdAt }: Omit<GroupRawType, "id" | "updatedAt">
 	): Promise<void> {
 		const { groupsDir, isCreated } = await this.getGroupsDir()
 
@@ -156,7 +167,12 @@ class GroupService {
 				"Группа с указанным ID не существует"
 			)
 
-		const oldSettings = JSON.parse(await readTextFile(groupDirSettFile))
+		const rawSettings = JSON.parse(await readTextFile(groupDirSettFile))
+		const oldSettings: GroupRawType = {
+			...rawSettings,
+			createdAt: new Date(rawSettings.createdAt),
+			updatedAt: new Date(rawSettings.updatedAt)
+		}
 
 		if (!safeParse(GroupSettingsSchema, oldSettings).success)
 			throw new ServiceError(
@@ -166,7 +182,11 @@ class GroupService {
 
 		await writeTextFile(
 			groupDirSettFile,
-			JSON.stringify({ id: oldSettings.id, title, color }, null, 2)
+			JSON.stringify(
+				{ id: oldSettings.id, title, color, updatedAt: new Date(), createdAt },
+				null,
+				2
+			)
 		)
 	}
 }

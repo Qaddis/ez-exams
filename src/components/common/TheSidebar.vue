@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { ref } from "vue"
 
 import { AnimatePresence, motion } from "motion-v"
 
@@ -21,8 +21,6 @@ const isOpen = ref<boolean>(true)
 const changeSidebarState = () => {
 	isOpen.value = !isOpen.value
 }
-
-const pinnedGroups = computed(() => groupsStore.groups.filter(g => g.isPinned))
 </script>
 
 <template>
@@ -52,13 +50,15 @@ const pinnedGroups = computed(() => groupsStore.groups.filter(g => g.isPinned))
 			<motion.ul
 				class="pinned-groups"
 				:animate="{
-					marginBottom: pinnedGroups.length > 0 ? 25 : 0,
-					transition: { delay: pinnedGroups.length > 0 ? 0 : 0.2 }
+					marginBottom: groupsStore.bookmarkedGroups.length > 0 ? 25 : 0,
+					transition: {
+						delay: groupsStore.bookmarkedGroups.length > 0 ? 0 : 0.2
+					}
 				}"
 			>
 				<animate-presence>
 					<sidebar-group-card
-						v-for="group in pinnedGroups"
+						v-for="group in groupsStore.bookmarkedGroups"
 						:data="group"
 						:is-open="isOpen"
 						:key="`sidebar-bm-group-${group.id}`"

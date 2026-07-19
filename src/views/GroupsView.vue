@@ -23,13 +23,10 @@ onMounted(async () => {
 
 		<div v-if="!groupsStore.isLoading" class="content">
 			<h3 class="sect-header">Закреплённые папки</h3>
-			<ul
-				v-if="groupsStore.groups.filter(g => g.isPinned).length > 0"
-				class="groups"
-			>
+			<ul v-if="groupsStore.bookmarkedGroups.length > 0" class="groups">
 				<animate-presence mode="popLayout">
 					<group-card
-						v-for="group in groupsStore.groups.filter(g => g.isPinned)"
+						v-for="group in groupsStore.bookmarkedGroups"
 						:key="`pinned-${group.id}`"
 						:data="group"
 					/>

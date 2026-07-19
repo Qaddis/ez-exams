@@ -5,7 +5,7 @@ import { groupColors } from "@/constants/groups.constants"
 import { GroupFormSchema } from "@/schemas/groups.schemas"
 import { useGroupsStore } from "@/stores/groups.store"
 import { useModalsStore } from "@/stores/modals.store"
-import type { GroupDataType } from "@/types/groups.types"
+import type { GroupFormDataType } from "@/types/groups.types"
 import validateForm from "@/utils/validateForm"
 
 import ModalOverlay from "@/components/base/ModalOverlay.vue"
@@ -15,7 +15,7 @@ import TextInput from "@/components/base/ui/TextInput.vue"
 const { closeModal } = useModalsStore()
 const { createGroup } = useGroupsStore()
 
-const formData = reactive<GroupDataType>({
+const formData = reactive<GroupFormDataType>({
 	title: "",
 	color: groupColors[0].value
 })

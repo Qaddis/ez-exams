@@ -14,11 +14,11 @@ import SettingsIcon from "@/assets/icons/settings.svg"
 
 const { data } = defineProps<{ data: IGroup }>()
 
-const { togglePinGroup } = useGroupsStore()
+const groupsStore = useGroupsStore()
 const { openModal } = useModalsStore()
 
 const changePinStatus = async (): Promise<void> => {
-	await togglePinGroup(data.id)
+	await groupsStore.togglePinGroup(data.id)
 }
 
 const openGroupSettings = (): void => {
@@ -59,6 +59,7 @@ const openGroupSettings = (): void => {
 				:class="{ pinned: data.isPinned }"
 				:style="{ borderColor: data.color }"
 				:title="data.isPinned ? 'Открепить' : 'Закрепить'"
+				:disabled="!data.isPinned && groupsStore.bookmarkedGroups.length === 3"
 			>
 				<bookmark-fill-icon
 					v-if="data.isPinned"
@@ -130,10 +131,14 @@ const openGroupSettings = (): void => {
 	width: 1.35rem;
 	height: 1.35rem;
 	font-size: 1.35rem;
-	transition: scale 0.15s;
+	transition: all 0.15s;
 }
 
-.btn:hover {
+.btn:not(:disabled):hover {
 	scale: 1.2;
+}
+
+.btn:disabled {
+	opacity: 0.65;
 }
 </style>

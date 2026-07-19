@@ -4,18 +4,35 @@ import { defineStore } from "pinia"
 
 import appSettingsService from "@/services/appSettings.service"
 import groupsService from "@/services/groups.service"
-import type { GroupDataType, GroupRawType, IGroup } from "@/types/groups.types"
+import type {
+	GroupFormDataType,
+	GroupRawType,
+	IGroup
+} from "@/types/groups.types"
 
 export const useGroupsStore = defineStore("groups-store", () => {
 	const rawGroups = ref<GroupRawType[]>([])
 	const pinnedGroupsIds = ref<GroupRawType["id"][]>([])
 
 	const isLoading = ref<boolean>(false)
+
 	const groups = computed<IGroup[]>(() => {
 		return rawGroups.value.map(g => ({
-			...g,
+			id: g.id,
+			title: g.title,
+			color: g.color,
 			isPinned: pinnedGroupsIds.value.includes(g.id)
 		}))
+	})
+	const bookmarkedGroups = computed<IGroup[]>(() => {
+		if (pinnedGroupsIds.value.length === 0) return []
+
+		const bmGroups: IGroup[] = []
+		pinnedGroupsIds.value.forEach(id => {
+			bmGroups.push(groups.value.find(g => g.id === id)!)
+		})
+
+		return bmGroups
 	})
 
 	/**
@@ -54,7 +71,7 @@ export const useGroupsStore = defineStore("groups-store", () => {
 	 * Создаёт новую группу и обновляет список групп в groups store
 	 * @param newGroup параметры новой группы
 	 */
-	async function createGroup(newGroup: GroupDataType) {
+	async function createGroup(newGroup: GroupFormDataType) {
 		try {
 			await groupsService.createGroup(newGroup)
 
@@ -87,6 +104,8 @@ export const useGroupsStore = defineStore("groups-store", () => {
 	async function togglePinGroup(id: GroupRawType["id"]) {
 		const isPinned = pinnedGroupsIds.value.includes(id)
 
+		if (!isPinned && pinnedGroupsIds.value.length >= 3) return
+
 		const updatedPins = isPinned
 			? pinnedGroupsIds.value.filter(g => g !== id)
 			: [...pinnedGroupsIds.value, id]
@@ -100,12 +119,19 @@ export const useGroupsStore = defineStore("groups-store", () => {
 		}
 	}
 
-	async function editGroup(id: GroupRawType["id"], newParams: GroupDataType) {
+	async function editGroup(
+		id: GroupRawType["id"],
+		newParams: GroupFormDataType
+	) {
 		try {
-			await groupsService.editGroup(id, newParams)
-
 			const groupIdx = rawGroups.value.findIndex(g => g.id === id)!
-			rawGroups.value[groupIdx] = { id, ...newParams }
+
+			await groupsService.editGroup(id, {
+				...newParams,
+				createdAt: rawGroups.value[groupIdx].createdAt
+			})
+
+			await refreshGroups()
 		} catch (error) {
 			console.error("Ошибка при изменении параметров группы:", error)
 		}
@@ -113,6 +139,7 @@ export const useGroupsStore = defineStore("groups-store", () => {
 
 	return {
 		groups,
+		bookmarkedGroups,
 		isLoading,
 		loadGroups,
 		createGroup,
