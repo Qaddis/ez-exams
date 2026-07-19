@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onMounted } from "vue"
 
+import { motion } from "motion-v"
+
 import { useGroupsStore } from "@/stores/groups.store"
 import { useModalsStore } from "@/stores/modals.store"
 
@@ -23,18 +25,26 @@ onMounted(async () => {
 
 		<div v-if="!groupsStore.isLoading" class="content">
 			<h3 class="sect-header">Закреплённые папки</h3>
-			<ul v-if="groupsStore.bookmarkedGroups.length > 0" class="groups">
+
+			<ul class="groups">
 				<animate-presence mode="popLayout">
 					<group-card
 						v-for="group in groupsStore.bookmarkedGroups"
 						:key="`pinned-${group.id}`"
 						:data="group"
 					/>
+
+					<motion.li
+						v-if="groupsStore.bookmarkedGroups.length === 0"
+						:initial="{ translateY: '10%', opacity: 0 }"
+						:animate="{ translateY: 0, opacity: 0.65 }"
+						:exit="{ translateY: '-10%', opacity: 0 }"
+						class="no-groups"
+					>
+						<span>Нет закреплённых папок</span>
+					</motion.li>
 				</animate-presence>
 			</ul>
-			<p v-else class="no-groups">
-				<span>Нет закреплённых папок</span>
-			</p>
 
 			<div class="row">
 				<h3 class="sect-header">Все папки</h3>
@@ -48,18 +58,25 @@ onMounted(async () => {
 				</button>
 			</div>
 
-			<ul v-if="groupsStore.groups.length > 0" class="groups">
+			<ul class="groups">
 				<animate-presence mode="popLayout">
 					<group-card
 						v-for="group in groupsStore.groups"
 						:key="group.id"
 						:data="group"
 					/>
+
+					<motion.li
+						v-if="groupsStore.groups.length === 0"
+						:initial="{ translateY: '10%', opacity: 0 }"
+						:animate="{ translateY: 0, opacity: 0.65 }"
+						:exit="{ translateY: '-10%', opacity: 0 }"
+						class="no-groups"
+					>
+						<span>Здесь будут ваши папки</span>
+					</motion.li>
 				</animate-presence>
 			</ul>
-			<p v-else class="no-groups">
-				<span>Здесь будут ваши папки</span>
-			</p>
 		</div>
 		<spinner v-else />
 	</section>
@@ -122,9 +139,13 @@ onMounted(async () => {
 
 .groups {
 	width: 100%;
+	min-height: 65px;
+
 	display: grid;
 	grid-template-columns: repeat(4, calc(25% - 7.5px));
 	gap: 10px;
+
+	position: relative;
 }
 
 .row {
@@ -139,6 +160,10 @@ onMounted(async () => {
 }
 
 .no-groups {
+	position: absolute;
+	top: 0;
+	left: 0;
+
 	width: 100%;
 	height: 65px;
 
