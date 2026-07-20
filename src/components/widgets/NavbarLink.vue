@@ -4,6 +4,8 @@ import { RouterLink, useRoute } from "vue-router"
 
 import { motion } from "motion-v"
 
+import { NavigationEnum } from "@/constants/navigation.constants"
+
 interface IProps {
 	to: string
 	icon: string
@@ -28,13 +30,19 @@ const slotText = computed<string | undefined>(() => {
 
 	return undefined
 })
+
+const isActive = computed<boolean>(() =>
+	props.to === NavigationEnum.HOME
+		? route.path === props.to
+		: route.path.includes(props.to)
+)
 </script>
 
 <template>
 	<router-link
 		:to="to"
 		class="link"
-		:class="{ active: route.path === to }"
+		:class="{ active: isActive }"
 		:title="slotText"
 	>
 		<component :is="icon" class="icon" />
