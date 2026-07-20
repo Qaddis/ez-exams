@@ -88,6 +88,46 @@ class GroupService {
 	}
 
 	/**
+	 * Возвращает путь до папки группы по её ID
+	 * @param id ID группы
+	 */
+	async getGroupDir(id: GroupRawType["id"]): Promise<string> {
+		const workDir = await appDataDir()
+		if (!(await exists(workDir)))
+			throw new ServiceError(
+				"groups-dir:non-exists",
+				"Рабочая директория отсутствует"
+			)
+
+		const groupDir = await join(workDir, FunctionalFilesEnum.GROUPS_DIR, id)
+		if (!(await exists(groupDir)))
+			throw new ServiceError(
+				"groups-dir:non-exists",
+				"Группа с таким ID не существует"
+			)
+
+		const groupSettFile = await join(
+			groupDir,
+			FunctionalFilesEnum.GROUP_SETTINGS_FILE
+		)
+
+		const rawData = JSON.parse(await readTextFile(groupSettFile))
+		const groupSettings: GroupRawType = {
+			...rawData,
+			createdAt: new Date(rawData.createdAt),
+			updatedAt: new Date(rawData.updatedAt)
+		}
+
+		if (!safeParse(GroupSettingsSchema, groupSettings).success)
+			throw new ServiceError(
+				"groups-dir:non-valid",
+				"Файл настроек группы не валиден"
+			)
+
+		return groupDir
+	}
+
+	/**
 	 * Создаёт новую группу
 	 * @param groupParams - объект, содержащий название и цвет группы
 	 */

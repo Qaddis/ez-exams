@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from "vue"
 
-import { motion } from "motion-v"
+import { AnimatePresence, motion } from "motion-v"
 
 import { useGroupsStore } from "@/stores/groups.store"
 import { useModalsStore } from "@/stores/modals.store"
@@ -9,7 +9,6 @@ import { useModalsStore } from "@/stores/modals.store"
 import PageHeader from "@/components/base/PageHeader.vue"
 import Spinner from "@/components/base/Spinner.vue"
 import GroupCard from "@/components/widgets/GroupCard.vue"
-import { AnimatePresence } from "motion-v"
 
 const groupsStore = useGroupsStore()
 const { openModal } = useModalsStore()
