@@ -1,18 +1,21 @@
 import { availableModals } from "@/constants/modals.constants"
 
-export interface IStoreModalsObj {
-	name: string
-	data: undefined | object
-}
+type AvailableModalElement = (typeof availableModals)[number]
 
-type StoreModalElementType = (typeof availableModals)[number]
+export type AvailableModalsType = AvailableModalElement["name"]
 
 export type ModalDataLookupType = {
-	[M in StoreModalElementType as M["name"]]: M["data"]
+	[M in AvailableModalElement as M["name"]]: M["data"]
 }
 
-export type AvailableModalsType = keyof ModalDataLookupType
-
 export type ActiveModalType = {
-	-readonly [K in keyof StoreModalElementType]: StoreModalElementType[K]
+	[K in AvailableModalsType]: {
+		name: K
+		data: ModalDataLookupType[K]
+	}
+}[AvailableModalsType]
+
+export interface IStoreModalsObj {
+	name: string
+	data: any
 }

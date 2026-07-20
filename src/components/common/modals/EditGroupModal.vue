@@ -60,11 +60,11 @@ const closeRemoveSect = () => {
 }
 
 watch(
-	() => modalsStore.modal?.name,
-	newModalName => {
-		if (newModalName === "editModal") {
+	() => modalsStore.modal,
+	currModal => {
+		if (currModal && currModal.name === "editModal") {
 			const groupInitData = groupsStore.groups.find(
-				g => g.id === modalsStore.modal!.data!.modalId
+				g => g.id === currModal.data.modalId
 			)
 
 			if (groupInitData) {
