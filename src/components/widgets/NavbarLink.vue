@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, useSlots } from "vue"
+import { type Component, computed, useSlots } from "vue"
 import { RouterLink, useRoute } from "vue-router"
 
 import { motion } from "motion-v"
@@ -8,7 +8,7 @@ import { NavigationEnum } from "@/constants/navigation.constants"
 
 interface IProps {
 	to: string
-	icon: string
+	icon: Component | string
 	isOpen: boolean
 }
 
