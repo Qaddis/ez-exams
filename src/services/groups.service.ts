@@ -70,19 +70,17 @@ class GroupService {
 			)
 			if (!(await exists(groupSettFile))) continue
 
-			const rawData = JSON.parse(await readTextFile(groupSettFile))
-			const groupSettings: GroupRawType = {
-				...rawData,
-				createdAt: new Date(rawData.createdAt),
-				updatedAt: new Date(rawData.updatedAt)
-			}
+			const groupSettings = JSON.parse(await readTextFile(groupSettFile))
 
 			if (!safeParse(GroupSettingsSchema, groupSettings).success) continue
 
 			groupsData.push(groupSettings)
 		}
 
-		groupsData.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+		groupsData.sort(
+			(a, b) =>
+				new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+		)
 
 		return groupsData
 	}
@@ -111,12 +109,7 @@ class GroupService {
 			FunctionalFilesEnum.GROUP_SETTINGS_FILE
 		)
 
-		const rawData = JSON.parse(await readTextFile(groupSettFile))
-		const groupSettings: GroupRawType = {
-			...rawData,
-			createdAt: new Date(rawData.createdAt),
-			updatedAt: new Date(rawData.updatedAt)
-		}
+		const groupSettings = JSON.parse(await readTextFile(groupSettFile))
 
 		if (!safeParse(GroupSettingsSchema, groupSettings).success)
 			throw new ServiceError(
@@ -155,7 +148,13 @@ class GroupService {
 		await writeTextFile(
 			groupSettFile,
 			JSON.stringify(
-				{ id, title, color, createdAt: new Date(), updatedAt: new Date() },
+				{
+					id,
+					title,
+					color,
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString()
+				},
 				null,
 				2
 			)
@@ -186,7 +185,7 @@ class GroupService {
 	 */
 	async editGroup(
 		id: GroupRawType["id"],
-		{ title, color, createdAt }: Omit<GroupRawType, "id" | "updatedAt">
+		{ title, color }: GroupFormDataType
 	): Promise<void> {
 		const { groupsDir, isCreated } = await this.getGroupsDir()
 
@@ -208,13 +207,8 @@ class GroupService {
 			)
 
 		const rawSettings = JSON.parse(await readTextFile(groupDirSettFile))
-		const oldSettings: GroupRawType = {
-			...rawSettings,
-			createdAt: new Date(rawSettings.createdAt),
-			updatedAt: new Date(rawSettings.updatedAt)
-		}
 
-		if (!safeParse(GroupSettingsSchema, oldSettings).success)
+		if (!safeParse(GroupSettingsSchema, rawSettings).success)
 			throw new ServiceError(
 				"groups-edit:non-valid",
 				"Файл настроек группы не валиден"
@@ -223,7 +217,13 @@ class GroupService {
 		await writeTextFile(
 			groupDirSettFile,
 			JSON.stringify(
-				{ id: oldSettings.id, title, color, updatedAt: new Date(), createdAt },
+				{
+					id: rawSettings.id,
+					title,
+					color,
+					updatedAt: new Date().toISOString(),
+					createdAt: rawSettings.createdAt
+				},
 				null,
 				2
 			)

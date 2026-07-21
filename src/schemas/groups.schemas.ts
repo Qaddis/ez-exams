@@ -6,8 +6,8 @@ export const GroupSettingsSchema = v.object({
 	id: v.string(),
 	color: v.picklist(groupColors.map(c => c.value)),
 	title: v.pipe(v.string(), v.minLength(3), v.maxLength(36)),
-	createdAt: v.date(),
-	updatedAt: v.date()
+	createdAt: v.pipe(v.string(), v.isoTimestamp()),
+	updatedAt: v.pipe(v.string(), v.isoTimestamp())
 })
 
 export const GroupFormSchema = v.object({

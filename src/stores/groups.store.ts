@@ -124,12 +124,7 @@ export const useGroupsStore = defineStore("groups-store", () => {
 		newParams: GroupFormDataType
 	) {
 		try {
-			const groupIdx = rawGroups.value.findIndex(g => g.id === id)!
-
-			await groupsService.editGroup(id, {
-				...newParams,
-				createdAt: rawGroups.value[groupIdx].createdAt
-			})
+			await groupsService.editGroup(id, newParams)
 
 			await refreshGroups()
 		} catch (error) {
