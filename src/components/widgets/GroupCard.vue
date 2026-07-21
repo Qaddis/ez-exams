@@ -22,7 +22,7 @@ const changePinStatus = async (): Promise<void> => {
 }
 
 const openGroupSettings = (): void => {
-	openModal("editModal", { modalId: data.id })
+	openModal("editGroup", { groupId: data.id })
 }
 </script>
 

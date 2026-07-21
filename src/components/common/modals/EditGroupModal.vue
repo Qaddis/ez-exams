@@ -62,9 +62,9 @@ const closeRemoveSect = () => {
 watch(
 	() => modalsStore.modal,
 	currModal => {
-		if (currModal && currModal.name === "editModal") {
+		if (currModal && currModal.name === "editGroup") {
 			const groupInitData = groupsStore.groups.find(
-				g => g.id === currModal.data.modalId
+				g => g.id === currModal.data.groupId
 			)
 
 			if (groupInitData) {
@@ -79,7 +79,7 @@ watch(
 </script>
 
 <template>
-	<modal-overlay modal-name="editModal" :close-func="close">
+	<modal-overlay modal-name="editGroup" :close-func="close">
 		<div class="content">
 			<h2 class="heading">
 				Настроить папку<br /><span>{{ groupId }}</span>

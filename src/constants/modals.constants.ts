@@ -5,7 +5,7 @@ export const availableModals = [
 		name: "createGroup",
 		data: undefined
 	},
-	{ name: "editModal", data: { modalId: "" as string } },
+	{ name: "editGroup", data: { groupId: "" as string } },
 	{
 		name: "deleteTicket",
 		data: {
