@@ -19,6 +19,8 @@ import BookmarkFillIcon from "@/assets/icons/bookmark-fill.svg"
 import BookmarkIcon from "@/assets/icons/bookmark.svg"
 import SettingsIcon from "@/assets/icons/settings.svg"
 
+type SortTypes = "created-inc" | "created-dec" | "updated-inc" | "updated-dec"
+
 const route = useRoute()
 const router = useRouter()
 
@@ -27,6 +29,50 @@ const modalsStore = useModalsStore()
 
 const tickets = ref<TicketMetadataType[]>([])
 const isLoading = ref<boolean>(true)
+
+const ticketsDisplay = computed<TicketMetadataType[]>(() => {
+	const searchRes = searchInput.value.trim()
+
+	const ticketsData = [...tickets.value]
+
+	switch (sortingInput.value) {
+		case "created-inc":
+			ticketsData.sort(
+				(a, b) =>
+					new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+			)
+			break
+		case "created-dec":
+			ticketsData.sort(
+				(a, b) =>
+					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+			)
+			break
+		case "updated-inc":
+			ticketsData.sort(
+				(a, b) =>
+					new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+			)
+			break
+		case "updated-dec":
+			ticketsData.sort(
+				(a, b) =>
+					new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+			)
+			break
+		default:
+			break
+	}
+
+	if (searchRes.length > 0)
+		return ticketsData.filter(t =>
+			t.title.toLowerCase().includes(searchRes.toLowerCase())
+		)
+	else return ticketsData
+})
+
+const searchInput = ref<string>("")
+const sortingInput = ref<SortTypes>("created-dec")
 
 const group = computed<IGroup | undefined>(() => {
 	return groupsStore.groups.find(g => g.id === route.params.groupId)
@@ -73,15 +119,42 @@ watch(() => group.value, refreshTickets, { immediate: true })
 				<div class="sort">
 					<label class="sort-label" for="tickets-sort">Сортировка:</label>
 
-					<select class="sort-select" name="tickets-sort" id="tickets-sort">
-						<option value="created-inc">⭡ По дате создания</option>
-						<option value="created-dec">⭣ По дате создания</option>
-						<option value="updated-inc">⭡ По дате обновления</option>
-						<option value="updated-dec">⭣ По дате обновления</option>
+					<select
+						v-model="sortingInput"
+						class="sort-select"
+						name="tickets-sort"
+						id="tickets-sort"
+					>
+						<option
+							title="По дате создания (сначала новые)"
+							value="created-dec"
+						>
+							⭣ По дате создания
+						</option>
+						<option
+							title="По дате создания (сначала старые)"
+							value="created-inc"
+						>
+							⭡ По дате создания
+						</option>
+
+						<option
+							title="По дате обновления (сначала новые)"
+							value="updated-dec"
+						>
+							⭣ По дате обновления
+						</option>
+						<option
+							title="По дате обновления (сначала старые)"
+							value="updated-inc"
+						>
+							⭡ По дате обновления
+						</option>
 					</select>
 				</div>
 
 				<text-input
+					v-model:model-value="searchInput"
 					class="search-inp"
 					id="search-inp"
 					label="Поиск:"
@@ -108,7 +181,7 @@ watch(() => group.value, refreshTickets, { immediate: true })
 				</li>
 
 				<ticket-card
-					v-for="ticket in tickets"
+					v-for="ticket in ticketsDisplay"
 					:data="ticket"
 					:group-id="group!.id"
 					:refresh-func="refreshTickets"
@@ -116,6 +189,13 @@ watch(() => group.value, refreshTickets, { immediate: true })
 
 				<li v-if="tickets.length === 0" class="no-tickets">
 					<span>Тут будут созданные вами билеты</span>
+				</li>
+
+				<li
+					v-if="tickets.length > 0 && ticketsDisplay.length === 0"
+					class="no-tickets"
+				>
+					<span>Ничего не найдено</span>
 				</li>
 			</ul>
 
