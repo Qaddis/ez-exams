@@ -6,6 +6,7 @@ import { NavigationEnum } from "@/constants/navigation.constants"
 import ticketsService from "@/services/tickets.service"
 import { useGroupsStore } from "@/stores/groups.store"
 import { useModalsStore } from "@/stores/modals.store"
+import type { SortVariantType } from "@/types/globals.types"
 import type { IGroup } from "@/types/groups.types"
 import type { TicketMetadataType } from "@/types/tickets.types"
 
@@ -18,8 +19,7 @@ import AddNoteIcon from "@/assets/icons/add-note.svg"
 import BookmarkFillIcon from "@/assets/icons/bookmark-fill.svg"
 import BookmarkIcon from "@/assets/icons/bookmark.svg"
 import SettingsIcon from "@/assets/icons/settings.svg"
-
-type SortTypes = "created-inc" | "created-dec" | "updated-inc" | "updated-dec"
+import SortSelect from "@/components/base/SortSelect.vue"
 
 const route = useRoute()
 const router = useRouter()
@@ -72,7 +72,7 @@ const ticketsDisplay = computed<TicketMetadataType[]>(() => {
 })
 
 const searchInput = ref<string>("")
-const sortingInput = ref<SortTypes>("created-dec")
+const sortingInput = ref<SortVariantType>("created-dec")
 
 const group = computed<IGroup | undefined>(() => {
 	return groupsStore.groups.find(g => g.id === route.params.groupId)
@@ -116,42 +116,7 @@ watch(() => group.value, refreshTickets, { immediate: true })
 
 		<div class="content">
 			<aside class="search-sect">
-				<div class="sort">
-					<label class="sort-label" for="tickets-sort">Сортировка:</label>
-
-					<select
-						v-model="sortingInput"
-						class="sort-select"
-						name="tickets-sort"
-						id="tickets-sort"
-					>
-						<option
-							title="По дате создания (сначала новые)"
-							value="created-dec"
-						>
-							⭣ По дате создания
-						</option>
-						<option
-							title="По дате создания (сначала старые)"
-							value="created-inc"
-						>
-							⭡ По дате создания
-						</option>
-
-						<option
-							title="По дате обновления (сначала новые)"
-							value="updated-dec"
-						>
-							⭣ По дате обновления
-						</option>
-						<option
-							title="По дате обновления (сначала старые)"
-							value="updated-inc"
-						>
-							⭡ По дате обновления
-						</option>
-					</select>
-				</div>
+				<sort-select v-model:init-value="sortingInput" />
 
 				<text-input
 					v-model:model-value="searchInput"
@@ -224,37 +189,6 @@ watch(() => group.value, refreshTickets, { immediate: true })
 	justify-content: space-between;
 	gap: 0 15px;
 	margin-bottom: 25px;
-}
-
-.sort {
-	display: flex;
-	flex-direction: column;
-}
-
-.sort-label {
-	font-size: 1.05rem;
-	margin-bottom: 1.5px;
-}
-
-.sort-select {
-	font-size: 1.05rem;
-	line-height: 1.1;
-	text-align: center;
-
-	border: 1px solid var(--primary-color);
-	border-radius: 3.5px;
-	padding: 2.5px;
-
-	transition: border-color 0.15s;
-}
-
-.sort-select:focus-visible {
-	outline: none;
-	border-color: var(--accent-color);
-}
-
-.sort-select option {
-	background-color: var(--light-color);
 }
 
 .search-inp {
