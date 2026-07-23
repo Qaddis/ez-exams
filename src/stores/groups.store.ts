@@ -18,9 +18,7 @@ export const useGroupsStore = defineStore("groups-store", () => {
 
 	const groups = computed<IGroup[]>(() => {
 		return rawGroups.value.map(g => ({
-			id: g.id,
-			title: g.title,
-			color: g.color,
+			...g,
 			isPinned: pinnedGroupsIds.value.includes(g.id)
 		}))
 	})

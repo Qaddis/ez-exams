@@ -2,7 +2,7 @@ import type { InferOutput } from "valibot"
 
 import { GroupFormSchema, GroupSettingsSchema } from "@/schemas/groups.schemas"
 
-export interface IGroup extends GroupFieldsType {
+export interface IGroup extends GroupRawType {
 	isPinned: boolean
 }
 
