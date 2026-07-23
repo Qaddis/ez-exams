@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue"
+import { computed, ref } from "vue"
 
 import { AnimatePresence, motion } from "motion-v"
 
 import { useGroupsStore } from "@/stores/groups.store"
 import { useModalsStore } from "@/stores/modals.store"
+import { SortVariantType } from "@/types/globals.types"
 import type { IGroup } from "@/types/groups.types"
 
 import PageHeader from "@/components/base/PageHeader.vue"
@@ -12,14 +13,9 @@ import SortSelect from "@/components/base/SortSelect.vue"
 import Spinner from "@/components/base/Spinner.vue"
 import TextInput from "@/components/base/ui/TextInput.vue"
 import GroupCard from "@/components/widgets/GroupCard.vue"
-import { SortVariantType } from "@/types/globals.types"
 
 const groupsStore = useGroupsStore()
 const { openModal } = useModalsStore()
-
-onMounted(async () => {
-	await groupsStore.loadGroups()
-})
 
 const groupsDisplay = computed<IGroup[]>(() => {
 	const searchRes = searchInput.value.trim()

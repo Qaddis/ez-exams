@@ -1,4 +1,4 @@
-import { computed, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
 
 import { defineStore } from "pinia"
 
@@ -36,8 +36,10 @@ export const useGroupsStore = defineStore("groups-store", () => {
 	/**
 	 * Загружает группы в groups state
 	 */
-	async function loadGroups() {
+	async function loadGroups(force: boolean = false) {
 		isLoading.value = true
+
+		if (rawGroups.value.length > 0 && !force) return
 
 		try {
 			const [groupsData, { pinnedGroups }] = await Promise.all([
@@ -129,6 +131,8 @@ export const useGroupsStore = defineStore("groups-store", () => {
 			console.error("Ошибка при изменении параметров группы:", error)
 		}
 	}
+
+	onMounted(() => loadGroups())
 
 	return {
 		groups,
