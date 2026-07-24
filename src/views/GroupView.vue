@@ -2,7 +2,8 @@
 import { computed, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
-import { NavigationEnum } from "@/constants/navigation.constants"
+import { AnimatePresence, motion } from "motion-v"
+
 import ticketsService from "@/services/tickets.service"
 import { useGroupsStore } from "@/stores/groups.store"
 import { useModalsStore } from "@/stores/modals.store"
@@ -61,6 +62,10 @@ const ticketsDisplay = computed<TicketMetadataType[]>(() => {
 			)
 			break
 		default:
+			ticketsData.sort(
+				(a, b) =>
+					new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+			)
 			break
 	}
 
@@ -91,7 +96,8 @@ const createNewTicket = async (): Promise<void> => {
 	if (group.value) {
 		const ticketId = await ticketsService.createTicket(group.value.id)
 
-		router.push(NavigationEnum.TICKET + `${group.value.id}/${ticketId}`)
+		// router.push(NavigationEnum.TICKET + `${group.value.id}/${ticketId}`)
+		await refreshTickets()
 	}
 }
 
@@ -145,23 +151,37 @@ watch(() => group.value, refreshTickets, { immediate: true })
 					</button>
 				</li>
 
-				<ticket-card
-					v-for="ticket in ticketsDisplay"
-					:data="ticket"
-					:group-id="group!.id"
-					:refresh-func="refreshTickets"
-				/>
+				<animate-presence mode="popLayout">
+					<ticket-card
+						v-for="ticket in ticketsDisplay"
+						:data="ticket"
+						:group-id="group!.id"
+						:refresh-func="refreshTickets"
+						:key="`tk-${ticket.id}`"
+					/>
 
-				<li v-if="tickets.length === 0" class="no-tickets">
-					<span>Тут будут созданные вами билеты</span>
-				</li>
+					<motion.li
+						v-if="tickets.length === 0"
+						class="no-tickets"
+						key="no-tickets"
+						:initial="{ translateY: '10%', opacity: 0 }"
+						:animate="{ translateY: 0, opacity: 0.75 }"
+						:exit="{ translateY: '10%', opacity: 0 }"
+					>
+						<span>Тут будут созданные вами билеты</span>
+					</motion.li>
 
-				<li
-					v-if="tickets.length > 0 && ticketsDisplay.length === 0"
-					class="no-tickets"
-				>
-					<span>Ничего не найдено</span>
-				</li>
+					<motion.li
+						v-if="tickets.length > 0 && ticketsDisplay.length === 0"
+						class="no-tickets"
+						key="no-found"
+						:initial="{ translateY: '10%', opacity: 0 }"
+						:animate="{ translateY: 0, opacity: 0.75 }"
+						:exit="{ translateY: '10%', opacity: 0 }"
+					>
+						<span>Ничего не найдено</span>
+					</motion.li>
+				</animate-presence>
 			</ul>
 
 			<spinner v-else />
@@ -240,10 +260,14 @@ watch(() => group.value, refreshTickets, { immediate: true })
 .tickets {
 	display: flex;
 	flex-direction: column;
+	flex-grow: 1;
 	gap: 10px 0;
 	padding: 2.5px 15px 7.5px 7.5px;
-	scrollbar-gutter: stable;
+
 	overflow-y: scroll;
+	overflow-x: hidden;
+	scrollbar-gutter: stable;
+
 	container-type: inline-size;
 	container-name: tickets;
 }

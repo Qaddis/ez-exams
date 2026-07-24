@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router"
 
+import { motion } from "motion-v"
 import { safeParse } from "valibot"
 
 import { NavigationEnum } from "@/constants/navigation.constants"
@@ -82,7 +83,13 @@ const onInput = (evt: Event): void => {
 </script>
 
 <template>
-	<li class="ticket">
+	<motion.li
+		class="ticket"
+		layout="position"
+		:initial="{ y: 10, opacity: 0 }"
+		:animate="{ y: 0, opacity: 1 }"
+		:exit="{ y: -10, opacity: 0 }"
+	>
 		<router-link
 			:to="NavigationEnum.TICKET + `${groupId}/${data.id}`"
 			class="link"
@@ -108,7 +115,7 @@ const onInput = (evt: Event): void => {
 				<delete-icon />
 			</button>
 		</div>
-	</li>
+	</motion.li>
 </template>
 
 <style scoped>
@@ -116,6 +123,7 @@ const onInput = (evt: Event): void => {
 	width: 100%;
 	height: 62.5px;
 	padding: 7.5px;
+	background-color: var(--light-color);
 	box-shadow: 0 1.5px 5px 2.5px rgba(0, 0, 0, 0.3);
 	border-radius: 5px;
 
