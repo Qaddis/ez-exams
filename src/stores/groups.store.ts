@@ -119,6 +119,11 @@ export const useGroupsStore = defineStore("groups-store", () => {
 		}
 	}
 
+	/**
+	 * Изменяет группу по её ID
+	 * @param id ID группы
+	 * @param newParams Новые параметры группы
+	 */
 	async function editGroup(
 		id: GroupRawType["id"],
 		newParams: GroupFormDataType
