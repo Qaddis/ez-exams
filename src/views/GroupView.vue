@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "motion-v"
 import ticketsService from "@/services/tickets.service"
 import { useGroupsStore } from "@/stores/groups.store"
 import { useModalsStore } from "@/stores/modals.store"
-import type { SortVariantType } from "@/types/globals.types"
+import type { SortVariantType } from "@/types/appSettings.types"
 import type { IGroup } from "@/types/groups.types"
 import type { TicketMetadataType } from "@/types/tickets.types"
 

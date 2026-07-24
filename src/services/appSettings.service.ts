@@ -9,10 +9,8 @@ import {
 
 import { safeParse } from "valibot"
 
-import {
-	baseAppSettings,
-	FunctionalFilesEnum
-} from "@/constants/files.constants"
+import { baseAppSettings } from "@/constants/appSettings.constants"
+import { FunctionalFilesEnum } from "@/constants/files.constants"
 import { AppSettingsSchema } from "@/schemas/appSettings.schemas"
 import type { AppSettingsType } from "@/types/appSettings.types"
 

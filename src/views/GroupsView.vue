@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "motion-v"
 
 import { useGroupsStore } from "@/stores/groups.store"
 import { useModalsStore } from "@/stores/modals.store"
-import { SortVariantType } from "@/types/globals.types"
+import { SortVariantType } from "@/types/appSettings.types"
 import type { IGroup } from "@/types/groups.types"
 
 import PageHeader from "@/components/base/PageHeader.vue"

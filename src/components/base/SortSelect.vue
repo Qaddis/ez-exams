@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SortVariantType } from "@/types/globals.types"
+import type { SortVariantType } from "@/types/appSettings.types"
 
 interface IProps {
 	initValue?: SortVariantType

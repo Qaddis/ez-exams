@@ -35,6 +35,7 @@ export const useGroupsStore = defineStore("groups-store", () => {
 
 	/**
 	 * Загружает группы в groups state
+	 * @param force Принудительная перезапись списка групп
 	 */
 	async function loadGroups(force: boolean = false) {
 		isLoading.value = true
