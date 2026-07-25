@@ -2,17 +2,21 @@ import { computed, onMounted, ref } from "vue"
 
 import { defineStore } from "pinia"
 
-import appSettingsService from "@/services/appSettings.service"
 import groupsService from "@/services/groups.service"
 import type {
 	GroupFormDataType,
 	GroupRawType,
 	IGroup
 } from "@/types/groups.types"
+import { useSettingsStore } from "./appSettings.store"
 
 export const useGroupsStore = defineStore("groups-store", () => {
+	const settingsStore = useSettingsStore()
+
 	const rawGroups = ref<GroupRawType[]>([])
-	const pinnedGroupsIds = ref<GroupRawType["id"][]>([])
+	const pinnedGroupsIds = computed<GroupRawType["id"][]>(
+		() => settingsStore.settings?.pinnedGroups ?? []
+	)
 
 	const isLoading = ref<boolean>(false)
 
@@ -25,12 +29,9 @@ export const useGroupsStore = defineStore("groups-store", () => {
 	const bookmarkedGroups = computed<IGroup[]>(() => {
 		if (pinnedGroupsIds.value.length === 0) return []
 
-		const bmGroups: IGroup[] = []
-		pinnedGroupsIds.value.forEach(id => {
-			bmGroups.push(groups.value.find(g => g.id === id)!)
-		})
-
-		return bmGroups
+		return pinnedGroupsIds.value
+			.map(id => groups.value.find(g => g.id === id))
+			.filter(g => g !== undefined)
 	})
 
 	/**
@@ -40,16 +41,15 @@ export const useGroupsStore = defineStore("groups-store", () => {
 	async function loadGroups(force: boolean = false) {
 		isLoading.value = true
 
-		if (rawGroups.value.length > 0 && !force) return
-
 		try {
-			const [groupsData, { pinnedGroups }] = await Promise.all([
-				groupsService.getAllGroups(),
-				appSettingsService.getSettings()
+			const [_, groupsData] = await Promise.all([
+				settingsStore.loadSettings(),
+				rawGroups.value.length === 0 || force
+					? groupsService.getAllGroups()
+					: Promise.resolve(rawGroups.value)
 			])
 
 			rawGroups.value = groupsData
-			pinnedGroupsIds.value = pinnedGroups
 		} catch (error) {
 			console.error("Ошибка при загрузке групп:", error)
 		} finally {
@@ -112,9 +112,7 @@ export const useGroupsStore = defineStore("groups-store", () => {
 			: [...pinnedGroupsIds.value, id]
 
 		try {
-			await appSettingsService.changeSettings({ pinnedGroups: updatedPins })
-
-			pinnedGroupsIds.value = updatedPins
+			await settingsStore.changeSettings({ pinnedGroups: updatedPins })
 		} catch (error) {
 			console.error("Ошибка при обновлении закреплений:", error)
 		}
