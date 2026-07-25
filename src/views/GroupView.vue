@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue"
+import { computed, ref, watch, watchEffect } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
 import { AnimatePresence, motion } from "motion-v"
 
+import { sortingVariants } from "@/constants/appSettings.constants"
+import { NavigationEnum } from "@/constants/navigation.constants"
 import ticketsService from "@/services/tickets.service"
+import { useSettingsStore } from "@/stores/appSettings.store"
 import { useGroupsStore } from "@/stores/groups.store"
 import { useModalsStore } from "@/stores/modals.store"
 import type { SortVariantType } from "@/types/appSettings.types"
@@ -25,11 +28,20 @@ import SortSelect from "@/components/base/SortSelect.vue"
 const route = useRoute()
 const router = useRouter()
 
+const settingsStore = useSettingsStore()
 const groupsStore = useGroupsStore()
 const modalsStore = useModalsStore()
 
 const tickets = ref<TicketMetadataType[]>([])
 const isLoading = ref<boolean>(true)
+
+const searchInput = ref<string>("")
+const sortingInput = ref<SortVariantType>(sortingVariants[0])
+
+watchEffect(() => {
+	if (settingsStore.settings?.defaultSortingVariant)
+		sortingInput.value = settingsStore.settings.defaultSortingVariant
+})
 
 const ticketsDisplay = computed<TicketMetadataType[]>(() => {
 	const searchRes = searchInput.value.trim()
@@ -76,9 +88,6 @@ const ticketsDisplay = computed<TicketMetadataType[]>(() => {
 	else return ticketsData
 })
 
-const searchInput = ref<string>("")
-const sortingInput = ref<SortVariantType>("created-dec")
-
 const group = computed<IGroup | undefined>(() => {
 	return groupsStore.groups.find(g => g.id === route.params.groupId)
 })
@@ -96,8 +105,9 @@ const createNewTicket = async (): Promise<void> => {
 	if (group.value) {
 		const ticketId = await ticketsService.createTicket(group.value.id)
 
-		// router.push(NavigationEnum.TICKET + `${group.value.id}/${ticketId}`)
-		await refreshTickets()
+		if (settingsStore.settings && !settingsStore.settings.openTicketOnCreate)
+			await refreshTickets()
+		else router.push(NavigationEnum.TICKET + `${group.value.id}/${ticketId}`)
 	}
 }
 
