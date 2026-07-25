@@ -55,7 +55,7 @@ class AppSettingsService {
 	 */
 	private async initSettings(): Promise<void> {
 		const baseDir = await appDataDir()
-		if (!exists(baseDir)) await mkdir(baseDir)
+		if (!(await exists(baseDir))) await mkdir(baseDir)
 
 		const appSettFile = await join(
 			baseDir,
