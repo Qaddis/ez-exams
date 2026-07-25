@@ -29,6 +29,7 @@ const onSelect = (evt: Event): void => {
 		<label class="sort-label" for="tickets-sort">Сортировка:</label>
 
 		<select
+			:value="initValue"
 			@change="onSelect"
 			class="sort-select"
 			name="tickets-sort"
