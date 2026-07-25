@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed, ref, watchEffect } from "vue"
 
 import { AnimatePresence, motion } from "motion-v"
 
+import { useSettingsStore } from "@/stores/appSettings.store"
 import { useGroupsStore } from "@/stores/groups.store"
 import { useModalsStore } from "@/stores/modals.store"
 import { SortVariantType } from "@/types/appSettings.types"
@@ -14,8 +15,17 @@ import Spinner from "@/components/base/Spinner.vue"
 import TextInput from "@/components/base/ui/TextInput.vue"
 import GroupCard from "@/components/widgets/GroupCard.vue"
 
+const settingsStore = useSettingsStore()
 const groupsStore = useGroupsStore()
 const { openModal } = useModalsStore()
+
+const searchInput = ref<string>("")
+const sortingInput = ref<SortVariantType>("created-dec")
+
+watchEffect(() => {
+	if (settingsStore.settings?.defaultSortingVariant)
+		sortingInput.value = settingsStore.settings.defaultSortingVariant
+})
 
 const groupsDisplay = computed<IGroup[]>(() => {
 	const searchRes = searchInput.value.trim()
@@ -55,9 +65,6 @@ const groupsDisplay = computed<IGroup[]>(() => {
 		)
 	else return groupsData
 })
-
-const searchInput = ref<string>("")
-const sortingInput = ref<SortVariantType>("created-dec")
 </script>
 
 <template>
