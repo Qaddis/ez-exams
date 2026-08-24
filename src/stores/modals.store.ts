@@ -13,17 +13,18 @@ export const useModalsStore = defineStore("modals-store", () => {
 
 	/**
 	 * Открывает указанное модальное окно
-	 * @param target Название модального окна
+	 * @param name Название модального окна
+	 * @param args Данные модального окна (обязательны, если не undefined)
 	 */
 	function openModal<T extends AvailableModalsType>(
 		name: T,
 		...args: ModalDataLookupType[T] extends undefined
-			? [data?: undefined]
+			? []
 			: [data: ModalDataLookupType[T]]
 	): void {
-		const data = args[0]
+		const data = args[0] as ModalDataLookupType[T]
 
-		modal.value = { name, data }
+		modal.value = { name, data } as Extract<ActiveModalType, { name: T }>
 	}
 
 	/**
