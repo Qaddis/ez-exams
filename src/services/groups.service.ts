@@ -33,14 +33,14 @@ class GroupService {
 
 		const baseDir = await appDataDir()
 		if (!(await exists(baseDir))) {
-			mkdir(baseDir)
+			await mkdir(baseDir)
 
 			isCreated = true
 		}
 
 		const groupsDir = await join(baseDir, FunctionalFilesEnum.GROUPS_DIR)
 		if (!(await exists(groupsDir))) {
-			mkdir(groupsDir)
+			await mkdir(groupsDir)
 
 			isCreated = true
 		}
