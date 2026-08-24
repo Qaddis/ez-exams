@@ -1,7 +1,10 @@
-import { computed, onMounted, ref } from "vue"
-
 import { defineStore } from "pinia"
+import { computed, onMounted, onUnmounted, ref } from "vue"
 
+import { listen, type UnlistenFn } from "@tauri-apps/api/event"
+import { safeParse } from "valibot"
+
+import { GroupSettingsSchema } from "@/schemas/groups.schemas"
 import groupsService from "@/services/groups.service"
 import type {
 	GroupFormDataType,
@@ -34,6 +37,8 @@ export const useGroupsStore = defineStore("groups-store", () => {
 			.filter(g => g !== undefined)
 	})
 
+	let unlistenLoadGroups: UnlistenFn | null = null
+
 	/**
 	 * Загружает группы в groups state
 	 * @param force Принудительная перезапись списка групп
@@ -58,17 +63,6 @@ export const useGroupsStore = defineStore("groups-store", () => {
 	}
 
 	/**
-	 * Вспомогательный метод для обновления списка групп
-	 */
-	async function refreshGroups() {
-		try {
-			rawGroups.value = await groupsService.getAllGroups()
-		} catch (error) {
-			console.error("Ошибка при обновлении списка групп:", error)
-		}
-	}
-
-	/**
 	 * Создаёт новую группу и обновляет список групп в groups store
 	 * @param newGroup параметры новой группы
 	 */
@@ -76,7 +70,7 @@ export const useGroupsStore = defineStore("groups-store", () => {
 		try {
 			await groupsService.createGroup(newGroup)
 
-			await refreshGroups()
+			// await refreshGroups()
 		} catch (error) {
 			console.error("Ошибка при создании группы:", error)
 		}
@@ -91,8 +85,6 @@ export const useGroupsStore = defineStore("groups-store", () => {
 			await groupsService.removeGroup(id)
 
 			if (pinnedGroupsIds.value.includes(id)) await togglePinGroup(id)
-
-			await refreshGroups()
 		} catch (error) {
 			console.error("Ошибка при удалении группы:", error)
 		}
@@ -129,14 +121,40 @@ export const useGroupsStore = defineStore("groups-store", () => {
 	) {
 		try {
 			await groupsService.editGroup(id, newParams)
-
-			await refreshGroups()
 		} catch (error) {
 			console.error("Ошибка при изменении параметров группы:", error)
 		}
 	}
 
-	onMounted(() => loadGroups())
+	/**
+	 * Обработка вызовов emits из Rust
+	 */
+	async function setupWatcherListeners() {
+		unlistenLoadGroups = await listen("watcher:load-groups", event => {
+			const data = event.payload as unknown[]
+
+			const validGroups = data
+				.map(g => safeParse(GroupSettingsSchema, g))
+				.filter(r => r.success)
+				.map(g => g.output) as GroupRawType[]
+
+			validGroups.sort(
+				(a, b) =>
+					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+			)
+
+			rawGroups.value = validGroups
+		})
+	}
+
+	onMounted(async () => {
+		await loadGroups()
+		await setupWatcherListeners()
+	})
+
+	onUnmounted(() => {
+		unlistenLoadGroups?.()
+	})
 
 	return {
 		groups,
