@@ -20,7 +20,6 @@ import DeleteIcon from "@/assets/icons/delete.svg"
 interface IProps {
 	data: TicketMetadataType
 	groupId: string
-	refreshFunc: () => Promise<void>
 }
 
 const props = defineProps<IProps>()
@@ -30,8 +29,7 @@ const { openModal } = useModalsStore()
 const deleteTicket = async (): Promise<void> => {
 	openModal("deleteTicket", {
 		groupId: props.groupId,
-		ticketId: props.data.id,
-		onSuccess: props.refreshFunc
+		ticketId: props.data.id
 	})
 }
 
@@ -52,8 +50,6 @@ const onBlur = async (evt: Event): Promise<void> => {
 			props.data.id,
 			newTitle
 		)
-
-		await props.refreshFunc()
 	} catch (error) {
 		console.error(
 			"Ошибка при изменении названия билета:",

@@ -10,8 +10,7 @@ export const availableModals = [
 		name: "deleteTicket",
 		data: {
 			groupId: "" as string,
-			ticketId: 0 as number,
-			onSuccess: undefined as (() => void) | undefined
+			ticketId: 0 as number
 		}
 	}
 ] as const satisfies Readonly<IStoreModalsObj[]>

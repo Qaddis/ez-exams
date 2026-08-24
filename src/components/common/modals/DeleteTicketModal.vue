@@ -19,8 +19,6 @@ const deleteTicket = async (): Promise<void> => {
 		try {
 			await ticketsService.removeTicket(modal.data.groupId, modal.data.ticketId)
 
-			if (modal.data.onSuccess) modal.data.onSuccess()
-
 			modalsStore.closeModal()
 		} catch (error) {
 			console.error("Ошибка при удалении билета:", getServiceErrorData(error))

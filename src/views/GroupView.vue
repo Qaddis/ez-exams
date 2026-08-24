@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, ref, watch, watchEffect } from "vue"
+import { computed, onMounted, onUnmounted, ref, watch, watchEffect } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
+import { listen, type UnlistenFn } from "@tauri-apps/api/event"
 import { AnimatePresence, motion } from "motion-v"
 
 import { sortingVariants } from "@/constants/appSettings.constants"
@@ -24,6 +25,8 @@ import BookmarkFillIcon from "@/assets/icons/bookmark-fill.svg"
 import BookmarkIcon from "@/assets/icons/bookmark.svg"
 import SettingsIcon from "@/assets/icons/settings.svg"
 import SortSelect from "@/components/base/SortSelect.vue"
+import { TicketMetadataSchema } from "@/schemas/tickets.schemas"
+import { safeParse } from "valibot"
 
 const route = useRoute()
 const router = useRouter()
@@ -37,6 +40,8 @@ const isLoading = ref<boolean>(true)
 
 const searchInput = ref<string>("")
 const sortingInput = ref<SortVariantType>(sortingVariants[0])
+
+let unlistenTicketsUpdate: UnlistenFn | null = null
 
 watchEffect(() => {
 	if (settingsStore.settings?.defaultSortingVariant)
@@ -105,9 +110,8 @@ const createNewTicket = async (): Promise<void> => {
 	if (group.value) {
 		const ticketId = await ticketsService.createTicket(group.value.id)
 
-		if (settingsStore.settings && !settingsStore.settings.openTicketOnCreate)
-			await refreshTickets()
-		else router.push(NavigationEnum.TICKET + `${group.value.id}/${ticketId}`)
+		if (settingsStore.settings && settingsStore.settings.openTicketOnCreate)
+			router.push(NavigationEnum.TICKET + `${group.value.id}/${ticketId}`)
 	}
 }
 
@@ -119,6 +123,38 @@ const refreshTickets = async (): Promise<void> => {
 }
 
 watch(() => group.value, refreshTickets, { immediate: true })
+
+// Работа с emits из Rust
+const setupWatcherListener = async () => {
+	if (unlistenTicketsUpdate) {
+		unlistenTicketsUpdate()
+		unlistenTicketsUpdate = null
+	}
+
+	unlistenTicketsUpdate = await listen("watcher:load-tickets", event => {
+		const payload = event.payload as { groupId: string; tickets: unknown[] }
+
+		if (payload.groupId !== group.value?.id) return
+
+		const validTickets = payload.tickets
+			.map(t => safeParse(TicketMetadataSchema, t))
+			.filter(res => res.success)
+			.map(res => res.output) as TicketMetadataType[]
+
+		tickets.value = validTickets
+	})
+}
+
+onMounted(async () => {
+	await setupWatcherListener()
+})
+
+onUnmounted(() => {
+	if (unlistenTicketsUpdate) {
+		unlistenTicketsUpdate()
+		unlistenTicketsUpdate = null
+	}
+})
 </script>
 
 <template>
@@ -166,7 +202,6 @@ watch(() => group.value, refreshTickets, { immediate: true })
 						v-for="ticket in ticketsDisplay"
 						:data="ticket"
 						:group-id="group!.id"
-						:refresh-func="refreshTickets"
 						:key="`tk-${ticket.id}`"
 					/>
 
