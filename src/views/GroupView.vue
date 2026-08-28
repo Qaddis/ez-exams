@@ -159,7 +159,7 @@ onUnmounted(() => {
 
 <template>
 	<section class="group-page">
-		<page-header>
+		<page-header with-back>
 			<span v-if="group" :style="{ color: group.color }">
 				{{ group.title }}
 			</span>
