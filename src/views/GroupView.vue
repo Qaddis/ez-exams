@@ -4,9 +4,11 @@ import { useRoute, useRouter } from "vue-router"
 
 import { listen, type UnlistenFn } from "@tauri-apps/api/event"
 import { AnimatePresence, motion } from "motion-v"
+import { safeParse } from "valibot"
 
 import { sortingVariants } from "@/constants/appSettings.constants"
 import { NavigationEnum } from "@/constants/navigation.constants"
+import { TicketMetadataSchema } from "@/schemas/tickets.schemas"
 import ticketsService from "@/services/tickets.service"
 import { useSettingsStore } from "@/stores/appSettings.store"
 import { useGroupsStore } from "@/stores/groups.store"
@@ -16,6 +18,7 @@ import type { IGroup } from "@/types/groups.types"
 import type { TicketMetadataType } from "@/types/tickets.types"
 
 import PageHeader from "@/components/base/PageHeader.vue"
+import SortSelect from "@/components/base/SortSelect.vue"
 import Spinner from "@/components/base/Spinner.vue"
 import TextInput from "@/components/base/ui/TextInput.vue"
 import TicketCard from "@/components/widgets/TicketCard.vue"
@@ -23,10 +26,8 @@ import TicketCard from "@/components/widgets/TicketCard.vue"
 import AddNoteIcon from "@/assets/icons/add-note.svg"
 import BookmarkFillIcon from "@/assets/icons/bookmark-fill.svg"
 import BookmarkIcon from "@/assets/icons/bookmark.svg"
+import PlayIcon from "@/assets/icons/play.svg"
 import SettingsIcon from "@/assets/icons/settings.svg"
-import SortSelect from "@/components/base/SortSelect.vue"
-import { TicketMetadataSchema } from "@/schemas/tickets.schemas"
-import { safeParse } from "valibot"
 
 const route = useRoute()
 const router = useRouter()
@@ -96,6 +97,10 @@ const ticketsDisplay = computed<TicketMetadataType[]>(() => {
 const group = computed<IGroup | undefined>(() => {
 	return groupsStore.groups.find(g => g.id === route.params.groupId)
 })
+
+const startTestExam = (): void => {
+	router.push(NavigationEnum.EXAM + group.value!.id)
+}
 
 const openSettings = (): void => {
 	if (group.value)
@@ -179,12 +184,28 @@ onUnmounted(() => {
 				/>
 
 				<div class="setting-buttons">
-					<button @click="togglePinStatus" class="stg-button">
+					<button
+						@click="startTestExam"
+						class="stg-button"
+						title="Запустить тестовый экзамен"
+					>
+						<play-icon />
+					</button>
+
+					<button
+						@click="togglePinStatus"
+						class="stg-button"
+						:title="group?.isPinned ? 'Открепить' : 'Закрепить'"
+					>
 						<bookmark-fill-icon v-if="group?.isPinned" />
 						<bookmark-icon v-else />
 					</button>
 
-					<button @click="openSettings" class="stg-button">
+					<button
+						@click="openSettings"
+						class="stg-button"
+						title="Открыть настройки группы"
+					>
 						<settings-icon />
 					</button>
 				</div>
