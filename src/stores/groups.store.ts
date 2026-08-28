@@ -69,8 +69,6 @@ export const useGroupsStore = defineStore("groups-store", () => {
 	async function createGroup(newGroup: GroupFormDataType) {
 		try {
 			await groupsService.createGroup(newGroup)
-
-			// await refreshGroups()
 		} catch (error) {
 			console.error("Ошибка при создании группы:", error)
 		}
@@ -83,6 +81,8 @@ export const useGroupsStore = defineStore("groups-store", () => {
 	async function removeGroup(id: GroupRawType["id"]) {
 		try {
 			await groupsService.removeGroup(id)
+
+			rawGroups.value = rawGroups.value.filter(g => g.id !== id)
 
 			if (pinnedGroupsIds.value.includes(id)) await togglePinGroup(id)
 		} catch (error) {
@@ -121,6 +121,12 @@ export const useGroupsStore = defineStore("groups-store", () => {
 	) {
 		try {
 			await groupsService.editGroup(id, newParams)
+
+			const targetGroup = rawGroups.value.findIndex(g => g.id === id)
+			rawGroups.value[targetGroup] = {
+				...rawGroups.value[targetGroup],
+				...newParams
+			}
 		} catch (error) {
 			console.error("Ошибка при изменении параметров группы:", error)
 		}

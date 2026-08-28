@@ -49,6 +49,8 @@ export const useSettingsStore = defineStore("app-settings-store", () => {
 
 		try {
 			await appSettingsService.changeSettings(newSettings)
+
+			settings.value = { ...settings.value, ...newSettings }
 		} catch (error) {
 			console.error("Ошибка при обновлении данных:", error)
 		}
