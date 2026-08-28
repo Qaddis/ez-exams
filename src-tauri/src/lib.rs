@@ -20,7 +20,7 @@ pub fn run() {
 				create_dir_all(&app_data_dir).unwrap();
 			}
 
-			println!("Запуск отслеживания рабочей папки {:?}", app_data_dir);
+			// println!("Запуск отслеживания рабочей папки {:?}", app_data_dir);
 
 			let watcher = files_watcher::start_file_watcher(app_handle, app_data_dir);
 

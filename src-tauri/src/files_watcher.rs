@@ -1,13 +1,12 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use tauri::{AppHandle, Emitter};
-use notify::{Event, EventKind, RecursiveMode, RecommendedWatcher, Watcher};
+use notify::{ RecursiveMode, RecommendedWatcher};
+use notify_debouncer_mini::{new_debouncer, Debouncer, DebouncedEvent};
 
 use std::collections::HashSet;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicU64, Ordering};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::fs::{create_dir_all, read_dir, read_to_string};
 
 
@@ -15,33 +14,31 @@ const APP_SETTINGS_FILE: &str = "app.settings.json";
 const GROUPS_DIR: &str = "groups";
 const GROUPS_SETTINGS_FILE: &str = "settings.json";
 
-const COOLDOWN_MS: u64 = 500;
+const COOLDOWN_MS: u64 = 250;
 
-static LAST_TRIGGER_1: AtomicU64 = AtomicU64::new(0);
-static LAST_TRIGGER_2: AtomicU64 = AtomicU64::new(0);
-static LAST_TRIGGER_3: AtomicU64 = AtomicU64::new(0);
-
-pub fn start_file_watcher(app_handle: AppHandle, base_path: PathBuf) -> RecommendedWatcher {
+pub fn start_file_watcher(app_handle: AppHandle, base_path: PathBuf) -> Debouncer<RecommendedWatcher> {
 	let base_path_clone = base_path.clone();
 
-	let mut watcher = notify::recommended_watcher(move |res: Result<Event, _>| match res {
-		Ok(event) => {
+	let mut debouncer = new_debouncer(
+		std::time::Duration::from_millis(COOLDOWN_MS),
+		move |res: Result<Vec<DebouncedEvent>, _>| {
+			let events = match res {
+					Ok(events) => events,
+					Err(e) => {
+						println!("Ошибка files watcher: {}", e);
+						return;
+					}
+			};
+
 			let mut trigger_1 = false;
 			let mut trigger_2 = false;
 			let mut trigger_3 = false;
 
 			let mut target_groups: HashSet<String> = HashSet::new();
 
-			let is_create_or_remove = matches!(
-				event.kind,
-				EventKind::Create(_) | EventKind::Remove(_)
-			);
-			let is_modify = matches!(
-				event.kind,
-				EventKind::Modify(_)
-			);
+			for event in events {
+				let path = event.path;
 
-			for path in event.paths {
 				let rel_path = match path.strip_prefix(&base_path_clone) {
 					Ok(p) => p,
 					Err(_) => continue,
@@ -64,25 +61,24 @@ pub fn start_file_watcher(app_handle: AppHandle, base_path: PathBuf) -> Recommen
 				if components.get(0) == Some(&OsStr::new(GROUPS_DIR)) {
 					
 					// создание или удаление groups/
-					if components.len() == 1 && is_dir && is_create_or_remove {
+					if components.len() == 1 && is_dir {
 						trigger_2 = true;
 					}
 
 					// создание или удаление группы
-					if components.len() == 2 && is_dir && is_create_or_remove {
+					if components.len() == 2 && is_dir {
 						trigger_2 = true;
 					}
 
 					// изменение настроек группы
-					if components.len() == 3 && components.get(2) == Some(&OsStr::new("settings.json")) && (is_create_or_remove || is_modify) {
+					if components.len() == 3 && components.get(2) == Some(&OsStr::new("settings.json")) {
 							trigger_2 = true;
 					}
 
-					// WARN: возможно понадобиться проверка на редактирование билетов
 					// создание или удаление билетов
 					if components.len() == 3
-						&& !is_dir && path.extension().map_or(false, |ext| ext == "md")
-							&& (is_create_or_remove || is_modify) {
+						&& !is_dir
+						&& path.extension().map_or(false, |ext| ext == "md") {
 						trigger_3 = true;
 
 						if let Some(group_id) = components.get(1).and_then(|s| s.to_str()) {
@@ -92,33 +88,27 @@ pub fn start_file_watcher(app_handle: AppHandle, base_path: PathBuf) -> Recommen
 				}
 			}
 
-			let now = SystemTime::now()
-				.duration_since(UNIX_EPOCH)
-				.unwrap()
-				.as_millis() as u64;
-
-			if trigger_1 && check_cooldown(&LAST_TRIGGER_1, now) {
+			if trigger_1 {
 				app_settings_handler(&app_handle, &base_path_clone);
 			}
 			
-			if trigger_2 && check_cooldown(&LAST_TRIGGER_2, now) {
+			if trigger_2 {
 				groups_handler(&app_handle, &base_path_clone);
 			}
 			
-			if trigger_3 && check_cooldown(&LAST_TRIGGER_3, now) {
+			if trigger_3 {
 				for group_id in target_groups {
 					tickets_handler(&app_handle, &base_path_clone, &group_id);
 				}
 			}
-		}
-		Err(e) => println!("Ошибка files watcher: {}", e),
 	}).expect("Не удалось создать files watcher");
 
-	watcher
+	debouncer
+		.watcher()
 		.watch(&base_path, RecursiveMode::Recursive)
 		.expect("Не удалось запустить files watcher");
 
-	watcher
+	debouncer
 }
 
 // --- Сценарии ---
@@ -136,9 +126,6 @@ fn app_settings_handler(app_handle: &AppHandle, base_path: &Path) {
 }
 
 fn groups_handler(app_handle: &AppHandle, base_path: &Path) {
-	// FIXME: лучше переписать весь files_watcher через debouncer
-	std::thread::sleep(Duration::from_millis(150));
-
 	let groups_dir = base_path.join(GROUPS_DIR);
 	let mut groups_data: Vec<serde_json::Value> = Vec::new();
 
@@ -193,19 +180,6 @@ fn tickets_handler(app_handle: &AppHandle, base_path: &Path, group_id: &str) {
 }
 
 // --- Хэлперы ---
-
-// Проверка и обновления кулдауна
-fn check_cooldown(last_trigger: &AtomicU64, now: u64) -> bool {
-	let last = last_trigger.load(Ordering::Relaxed);
-
-	if now.saturating_sub(last) > COOLDOWN_MS {
-		last_trigger.store(now, Ordering::Relaxed);
-
-		true
-	} else {
-		false
-	}
-}
 
 // Извлекает метаданные из .md
 fn get_md_metadata(content: &str) -> Option<String> {
